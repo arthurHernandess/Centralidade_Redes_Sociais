@@ -192,6 +192,19 @@ void zerarArray(double* array, int n){
   }
 }
 
+void executarFloydWarshall(Grafo* g, int*** dist, int*** pred){
+  int n = g->numVertices;
+  *dist = (int**)malloc(sizeof(int*) *n);
+  *pred = (int**)malloc(sizeof(int*) *n);
+
+  for(int i = 0; i < n; i++){
+    (*dist)[i] = (int*)malloc(sizeof(int) *n);
+    (*pred)[i] = (int*)malloc(sizeof(int) *n);
+  }
+
+  calculaDistanciaFloydWarshall(g, *dist, *pred);
+}
+
 /* ------------------------------------------------------------------------------------------------------------- */
 
 void centralidadeDeGrau(Grafo* g, double* valores) {
@@ -216,16 +229,10 @@ void centralidadeDeProximidade(Grafo* g, double* valores) {
     return; // não é possível analisar centralidade em um grafo onde não há relacionamentos
 
   int n = g->numVertices;
+  int** dist; int** pred;
   zerarArray(valores, n);
-  int** dist = (int**)malloc(sizeof(int*)*n);
-  int** pred = (int**)malloc(sizeof(int*)*n);
 
-  for(int i = 0; i < n; i++){
-    dist[i] = (int*)malloc(sizeof(int)*n);
-    pred[i] = (int*)malloc(sizeof(int)*n);
-  }
-
-  calculaDistanciaFloydWarshall(g, dist, pred);
+  executarFloydWarshall(g, &dist, &pred);
 
   for(int j = 0; j < n; j++){
     for(int k = 0; k < n; k++){
@@ -237,7 +244,19 @@ void centralidadeDeProximidade(Grafo* g, double* valores) {
 }
 
 void centralidadeDeIntermediacao(Grafo* g, double* valores) {
-  /* COMPLETE/IMPLEMENTE ESTA FUNCAO */
+  if(g->numVertices < 2)
+    return; // não é possível analisar centralidade em um grafo onde não há relacionamentos
+
+  int n = g->numVertices;
+  zerarArray(valores, n);
+  int** dist; int** pred;
+
+  executarFloydWarshall(g, &dist, &pred);
+
+  exibeMatrizDistancias(dist, n);
+  exibeMatrizPredecessores(pred, n);
+
+  // resto da função 
 }
 
 void centralidadePageRank(Grafo* g, double* valores, int iteracoes) {
@@ -259,7 +278,7 @@ int main(){
   insereAresta(&g1,1,3);
 
   exibeGrafo(&g1);
-  centralidadeDeProximidade(&g1, valores);
+  centralidadeDeIntermediacao(&g1, valores);
   exibeArranjoReais(valores, 5);
 
   return 0;
