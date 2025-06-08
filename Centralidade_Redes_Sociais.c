@@ -19,20 +19,15 @@
 
 typedef int bool;
 
-/* Estrutura para representar nosso grafo usando matriz binaria de adjacencias */
 typedef struct {
     int numVertices;
     int numArestas;
     bool** matriz;
 } Grafo;
 
-
-/* Funcao auxiliar para o sistema de correcao automatica (nao mexer) */
 void printf123(){
     // Funcao usada pelo sistema de correcao automatica (nao mexer)
 }
-
-
 
 /* Estrutura para representar elementos de uma lista ligada de vertices */
 typedef struct aux{
@@ -40,21 +35,13 @@ typedef struct aux{
   struct aux* prox;
 } ElementoLista, *PONT;
 
-
-/* Estrutura para representar elementos de uma lista ligada com arestas
-   (pares de vertices)*/
+/* Estrutura para representar elementos de uma lista ligada com arestas (pares de vertices)*/
 typedef struct aux2{
   int origem;
   int destino;
   struct aux2* prox;
 } ArestaLista, * PONT2;
 
-
-/* Funcao que inicializa o grafo cujo endereco foi passado como parametro.
-   Isto e, cria a matriz de adjacencia (preenchida com ARESTAS_INVALIDAS),
-   e atribui valor para numVertices (recebendo o valor passado por parametro)
-   e numArestas igual a zero.
-*/
 bool inicializaGrafo(Grafo* g, int vertices){
   if (g==NULL || vertices<1) return false;
   g->numVertices = vertices;
@@ -70,10 +57,6 @@ bool inicializaGrafo(Grafo* g, int vertices){
   return true;
 }
 
-
-/* Funcao que libera a memoria da matriz de adjacencia do grafo cujo endereco
-   foi passado como parametro.
-*/
 bool liberaGrafo(Grafo* g){
   if (g==NULL) return false;
   int x;
@@ -86,11 +69,6 @@ bool liberaGrafo(Grafo* g){
   return true;
 }
 
-/* Funcao que insere uma nova aresta no grafo.
-   Se os vertices passados como parametro forem validos, ha duas possibilidades:
-   - a aresta nao existia;
-   - a aresta existia. 
-*/
 bool insereAresta(Grafo* g, int v1, int v2){
   if (!g || v1 < 0 || v2 < 0 || v1 >= g->numVertices || v2 >= g->numVertices) return false;
   if (g->matriz[v1][v2] == false){
@@ -100,10 +78,6 @@ bool insereAresta(Grafo* g, int v1, int v2){
   return true;
 }
 
-
-/* Funcao que exclui a aresta entre v1 e v2 (caso exista uma aresta valida
-   entre v1 e v2) e retorna true; ou retorna false, caso contrario.
-*/
 bool removeAresta(Grafo* g, int v1, int v2){
   if (!g || v1 < 0 || v2 < 0 || v1 >= g->numVertices || v2 >= g->numVertices || g->matriz[v1][v2] == false) return false;
   g->matriz[v1][v2] = false;
@@ -111,10 +85,6 @@ bool removeAresta(Grafo* g, int v1, int v2){
   return true;
 }
 
-
-/* Funcao que cria um grafo com o numero de vertices e
-   numero de arestas passados como parametro e retorna seu endereco.
-*/
 Grafo* criaGrafoAleatorio(int numVertices, int numArestas){
   int x, y, a, total;
   if (numVertices < 1 || numArestas >= numVertices*numVertices/2) {
@@ -137,11 +107,6 @@ Grafo* criaGrafoAleatorio(int numVertices, int numArestas){
   return g;
 }
 
-
-
-/* Funcao desenvolvida para exibir um grafo, no formato de uma matriz
-   de adjacencias.
-*/
 void exibeGrafo(Grafo* g){
   if(!g) return;
   int x, y;
@@ -157,11 +122,6 @@ void exibeGrafo(Grafo* g){
   printf("\n");
 }
 
-
-/* Funcao que calcula a distancia e o predecedor considerando todos os pares
-   vertices (distancia de todos para todos), com base no algoritmo de 
-   Floyd-Warshall.
-*/
 void calculaDistanciaFloydWarshall(Grafo* g, int** dist, int** pred){
   int i, j, k, n;
   n = g->numVertices;
@@ -188,10 +148,6 @@ void calculaDistanciaFloydWarshall(Grafo* g, int** dist, int** pred){
         }
 }
 
-
-/* Funcao que exibe uma matriz de distancias.
-   Caso a distancia seja INFINITO, imprime '-'.
-*/
 void exibeMatrizDistancias(int** matriz, int n){
   printf("Exibindo matriz de distancias.\n");
   int x, y;
@@ -208,10 +164,6 @@ void exibeMatrizDistancias(int** matriz, int n){
   printf("\n");
 }
 
-
-/* Funcao que exibe uma matriz de predecessores.
-   Caso a distancia seja INFINITO, imprime '-'.
-*/
 void exibeMatrizPredecessores(int** matriz, int n){
   printf("Exibindo matriz de predecessores.\n");
   int x, y;
@@ -227,8 +179,6 @@ void exibeMatrizPredecessores(int** matriz, int n){
   printf("\n");
 }
 
-
-/* Funcao que exibe os valores de um arranjo de numeros reais */
 void exibeArranjoReais(double* arranjo, int n){
   int x;
   for (x=0; x<n; x++) printf("  v%i\t", x);
@@ -239,54 +189,33 @@ void exibeArranjoReais(double* arranjo, int n){
   printf("\n\n");
 }
 
-
-
-
-/* FUNCOES QUE DEVEM SER COMPLETADAS PARA RESOLVER O EP.
-   A DESCRICAO DE CADA FUNCAO ESTA NO ENUNCIADO DO EP.
-   www.each.usp.br/digiampietri/ACH2024/ep2/ep2.pdf        */
-
+/* ------------------------------------------------------------------------------------------------------------- */
 
 /* Funcao que calcula a Centralidade de Grau de todos os vertices. */
 void centralidadeDeGrau(Grafo* g, double* valores) {
-
   /* COMPLETE/IMPLEMENTE ESTA FUNCAO */
-
 }
-
 
 /* Funcao que calcula a Centralidade de Proximidade de todos os vertices. */
 void centralidadeDeProximidade(Grafo* g, double* valores) {
-
   /* COMPLETE/IMPLEMENTE ESTA FUNCAO */
-
 }
-
 
 /* Funcao que calcula a Centralidade de Intermediacao de todos os vertices. */
 void centralidadeDeIntermediacao(Grafo* g, double* valores) {
-
   /* COMPLETE/IMPLEMENTE ESTA FUNCAO */
-
 }
-
 
 /* Funcao que calcula a Centralidade Page Rank de todos os vertices. */
 void centralidadePageRank(Grafo* g, double* valores, int iteracoes) {
-
   /* COMPLETE/IMPLEMENTE ESTA FUNCAO */
-
 }
 
+int main(){
+  return 0;
+}
 
-/* FIM DAS FUNCOES QUE DEVEM SER COMPLETADAS */
-
-
-/* Funcao que invoca e exibe os valores de cada uma das funcoes que voces
-   devem implementar neste EP.
-*/
 void testaFuncoes(Grafo* g, int n){
-
   double* valoresReais = (double*)malloc(sizeof(double)*n);
 
   printf("Centralidade de Grau:\n");
@@ -320,13 +249,7 @@ void testaFuncoes(Grafo* g, int n){
   free(valoresReais);
 }
 
-
-/* Funcao main para testar as funcoes implementadas neste EP.
-   Esta parte do codigo nao sera usada na correcao do EP e nao contempla
-   todos os testes possiveis.
-   Fique a vontade para realizar testes adicionais.
-*/
-int main() {
+/*int main() {
 
   int n = 5;
   double* valoresReais = (double*)malloc(sizeof(double)*n);
@@ -388,3 +311,4 @@ int main() {
 
   return 0;  
 }
+*/
