@@ -195,6 +195,9 @@ void zerarArray(double* array, int n){
 /* ------------------------------------------------------------------------------------------------------------- */
 
 void centralidadeDeGrau(Grafo* g, double* valores) {
+  if(g->numVertices < 2)
+    return; // não é possível analisar centralidade em um grafo onde não há relacionamentos
+
   int n = g->numVertices;
   zerarArray(valores, n);
 
@@ -209,6 +212,9 @@ void centralidadeDeGrau(Grafo* g, double* valores) {
 }
 
 void centralidadeDeProximidade(Grafo* g, double* valores) {
+  if(g->numVertices < 2)
+    return; // não é possível analisar centralidade em um grafo onde não há relacionamentos
+
   int n = g->numVertices;
   zerarArray(valores, n);
   int** dist = (int**)malloc(sizeof(int*)*n);
@@ -225,7 +231,8 @@ void centralidadeDeProximidade(Grafo* g, double* valores) {
     for(int k = 0; k < n; k++){
       valores[j] += dist[j][k];
     }
-    valores[j] = (n-1) / valores[j];
+    if(valores[j] != 0)
+      valores[j] = (n-1) / valores[j];
   }
 }
 
