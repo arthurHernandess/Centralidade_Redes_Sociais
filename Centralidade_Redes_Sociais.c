@@ -11,12 +11,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
 #define true 1
 #define false 0
-
 #define INFINITO 999999
-
 typedef int bool;
 
 typedef struct {
@@ -189,29 +186,59 @@ void exibeArranjoReais(double* arranjo, int n){
   printf("\n\n");
 }
 
-/* ------------------------------------------------------------------------------------------------------------- */
-
-/* Funcao que calcula a Centralidade de Grau de todos os vertices. */
-void centralidadeDeGrau(Grafo* g, double* valores) {
-  /* COMPLETE/IMPLEMENTE ESTA FUNCAO */
+void zerarArray(double* array, int n){
+  for(int i = 0; i<n; i++){
+    array[i] = 0;
+  }
 }
 
-/* Funcao que calcula a Centralidade de Proximidade de todos os vertices. */
+/* ------------------------------------------------------------------------------------------------------------- */
+
+void centralidadeDeGrau(Grafo* g, double* valores) {
+  int n = g->numVertices;
+  zerarArray(valores, n);
+
+  for(int i = 0; i < n; i++){
+    for(int j = 0; j < n; j++){
+      if(g->matriz[j][i] && i!=j){
+        valores[i]++;
+      }
+    }
+    valores[i] = valores[i] / (n-1);
+  }
+}
+
 void centralidadeDeProximidade(Grafo* g, double* valores) {
   /* COMPLETE/IMPLEMENTE ESTA FUNCAO */
 }
 
-/* Funcao que calcula a Centralidade de Intermediacao de todos os vertices. */
 void centralidadeDeIntermediacao(Grafo* g, double* valores) {
   /* COMPLETE/IMPLEMENTE ESTA FUNCAO */
 }
 
-/* Funcao que calcula a Centralidade Page Rank de todos os vertices. */
 void centralidadePageRank(Grafo* g, double* valores, int iteracoes) {
   /* COMPLETE/IMPLEMENTE ESTA FUNCAO */
 }
 
 int main(){
+  double* valores = (double*)malloc(sizeof(double)*5);
+  Grafo g1;
+
+  inicializaGrafo(&g1, 5);
+  insereAresta(&g1,0,0);
+  insereAresta(&g1,0,1);
+  insereAresta(&g1,1,2);
+  insereAresta(&g1,2,3);
+  insereAresta(&g1,3,4);
+  insereAresta(&g1,4,0);
+  insereAresta(&g1,0,2);
+  insereAresta(&g1,1,4);
+  insereAresta(&g1,1,3);
+
+  exibeGrafo(&g1);
+  centralidadeDeGrau(&g1, valores);
+  exibeArranjoReais(valores, 5);
+
   return 0;
 }
 
@@ -272,7 +299,6 @@ void testaFuncoes(Grafo* g, int n){
 
   testaFuncoes(&g1, n);
 
-
   printf("\n\nSEGUNDO EXEMPLO [auto-lacos]\n");
   insereAresta(&g1,0,0);
   insereAresta(&g1,2,2);
@@ -280,7 +306,6 @@ void testaFuncoes(Grafo* g, int n){
   exibeGrafo(&g1);
 
   testaFuncoes(&g1, n);
-
 
   printf("\n\nTERCEIRO EXEMPLO\n");
   Grafo g2;
@@ -297,7 +322,6 @@ void testaFuncoes(Grafo* g, int n){
   exibeGrafo(&g2);
 
   testaFuncoes(&g2, n);
-
 
   printf("\n\nQUARTO EXEMPLO (grafo aleatorio)\n\n");
   n = 10;
