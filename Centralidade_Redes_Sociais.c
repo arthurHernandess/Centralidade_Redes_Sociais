@@ -209,7 +209,24 @@ void centralidadeDeGrau(Grafo* g, double* valores) {
 }
 
 void centralidadeDeProximidade(Grafo* g, double* valores) {
-  /* COMPLETE/IMPLEMENTE ESTA FUNCAO */
+  int n = g->numVertices;
+  zerarArray(valores, n);
+  int** dist = (int**)malloc(sizeof(int*)*n);
+  int** pred = (int**)malloc(sizeof(int*)*n);
+
+  for(int i = 0; i < n; i++){
+    dist[i] = (int*)malloc(sizeof(int)*n);
+    pred[i] = (int*)malloc(sizeof(int)*n);
+  }
+
+  calculaDistanciaFloydWarshall(g, dist, pred);
+
+  for(int j = 0; j < n; j++){
+    for(int k = 0; k < n; k++){
+      valores[j] += dist[j][k];
+    }
+    valores[j] = (n-1) / valores[j];
+  }
 }
 
 void centralidadeDeIntermediacao(Grafo* g, double* valores) {
@@ -225,7 +242,6 @@ int main(){
   Grafo g1;
 
   inicializaGrafo(&g1, 5);
-  insereAresta(&g1,0,0);
   insereAresta(&g1,0,1);
   insereAresta(&g1,1,2);
   insereAresta(&g1,2,3);
@@ -236,7 +252,7 @@ int main(){
   insereAresta(&g1,1,3);
 
   exibeGrafo(&g1);
-  centralidadeDeGrau(&g1, valores);
+  centralidadeDeProximidade(&g1, valores);
   exibeArranjoReais(valores, 5);
 
   return 0;
@@ -334,5 +350,4 @@ void testaFuncoes(Grafo* g, int n){
   testaFuncoes(g3, n);
 
   return 0;  
-}
-*/
+}*/
