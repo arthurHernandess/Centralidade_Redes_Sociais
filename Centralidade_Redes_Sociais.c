@@ -192,6 +192,12 @@ void zerarArray(double* array, int n){
   }
 }
 
+void iniciarArrayCaminho(int* array, int n){
+  for(int i = 0; i<n; i++){   
+    array[i] = -1;
+  }
+}
+
 void executarFloydWarshall(Grafo* g, int*** dist, int*** pred){
   int n = g->numVertices;
   *dist = (int**)malloc(sizeof(int*) *n);
@@ -205,14 +211,27 @@ void executarFloydWarshall(Grafo* g, int*** dist, int*** pred){
   calculaDistanciaFloydWarshall(g, *dist, *pred);
 }
 
+void liberarMemoriaFW(int n, int*** dist, int*** pred){
+  for(int i = 0; i < n; i++){
+    free((*dist)[i]);
+    free((*pred)[i]);
+    (*dist)[i] = NULL;
+    (*pred)[i] = NULL;
+  }
+  free(*dist);
+  free(*pred);
+  (*dist) = NULL;
+  (*pred) = NULL;
+}
+
 /* ------------------------------------------------------------------------------------------------------------- */
 
 void centralidadeDeGrau(Grafo* g, double* valores) {
-  if(g->numVertices < 2)
-    return; // não é possível analisar centralidade em um grafo onde não há relacionamentos
-
   int n = g->numVertices;
   zerarArray(valores, n);
+
+  if(g->numVertices < 2)
+    return; // não é possível analisar centralidade em um grafo onde não há relacionamentos
 
   for(int i = 0; i < n; i++){
     for(int j = 0; j < n; j++){
@@ -225,13 +244,13 @@ void centralidadeDeGrau(Grafo* g, double* valores) {
 }
 
 void centralidadeDeProximidade(Grafo* g, double* valores) {
+  int n = g->numVertices;
+  zerarArray(valores, n);
+
   if(g->numVertices < 2)
     return; // não é possível analisar centralidade em um grafo onde não há relacionamentos
 
-  int n = g->numVertices;
   int** dist; int** pred;
-  zerarArray(valores, n);
-
   executarFloydWarshall(g, &dist, &pred);
 
   for(int j = 0; j < n; j++){
@@ -241,22 +260,64 @@ void centralidadeDeProximidade(Grafo* g, double* valores) {
     if(valores[j] != 0)
       valores[j] = (n-1) / valores[j];
   }
+
+  liberarMemoriaFW(n, &dist, &pred);
+  return;
 }
 
 void centralidadeDeIntermediacao(Grafo* g, double* valores) {
-  if(g->numVertices < 2)
-    return; // não é possível analisar centralidade em um grafo onde não há relacionamentos
-
   int n = g->numVertices;
   zerarArray(valores, n);
+
+  if(g->numVertices <= 2)
+    return; // não é possível analisar centralidade em um grafo onde não há relacionamentos
+
+  double fator = 1.0 / ((n - 1) * (n - 2)); // usado para a normalização do valor durante a execução
   int** dist; int** pred;
+
+  int* caminho = (int*)malloc(sizeof(int) * n); // esse caminho será usado para armazenar os vértices que compoem o caminho minimo entre j e k, reconstruído apartir da matriz de predecessores. Lembrando que esse caminho está invertido, portanto seu preenchimento será por exemplo [k, ..., ..., j, -1]. -1 representa o fim do caminho
+  iniciarArrayCaminho(caminho, n);
 
   executarFloydWarshall(g, &dist, &pred);
 
-  exibeMatrizDistancias(dist, n);
-  exibeMatrizPredecessores(pred, n);
+  // o processamento mais custoso é recriar o caminho (tirando a execução do FW)
+  // Poderíamos fazer um loop em i externo, mas isso faria recriar cada caminho n vezes ao invés de 1. 
+  // Da forma implementada, com o loop duplo para cada caminho recriado, fica mais eficiente, pois,
+  // o processamento de busca de um vértice no interior de um caminho é bem mais rápido que recriar o caminho
+  
+  for(int j = 0; j < n; j++){
+    for(int k = 0; k < n; k++){
+      if(j != k){                 // ignora os caminhos de j pra j
+        int h = 0;
+        caminho[h] = k;           // a primeira posição é o destino - e a última posição válida (antes dos -1's) é a origem
+        while(h < n){
+          if(h < dist[j][k])  
+            caminho[h+1] = pred[j][caminho[h]];   // preenche o caminho com os vértices que o compõe
+          else              
+            caminho[h+1] = -1;                    // preenche o resto das posições com -1 (invalido, fora do caminho)
+          h++;
+        }
 
-  // resto da função 
+        /*// visualizar o caminho completo - apenas para testes
+        printf("caminho de %d ate %d: ", j, k);
+        for(int y = 0; y < n; y++){
+          printf("%d, ", caminho[y]);
+        }
+        printf("\n");*/
+        
+        for(int x = 0; x < n; x++){   // pra cada caminho que recriamos vamos analisar a presença de cada vértice no interior do caminho e somar em valores[x] caso esteja presente
+          for(int y = 1; y < dist[j][k]; y++){  // começamos a analise no 1 e vamos até antes da distancia real para ignorarmos as pontas, que contém os vértices de saída e destino (que não entram na nossa conta)
+            if(caminho[y] == x){
+              valores[x] += fator;              // poderia fazer valores[x]++ e normalizar em um loop no final, mas assim eu evito outro loop, pois o algoritmo já está bem pesado
+            }
+          }
+        }
+      }
+    }
+  }
+
+  liberarMemoriaFW(n, &dist, &pred);
+  return;
 }
 
 void centralidadePageRank(Grafo* g, double* valores, int iteracoes) {
@@ -264,10 +325,11 @@ void centralidadePageRank(Grafo* g, double* valores, int iteracoes) {
 }
 
 int main(){
-  double* valores = (double*)malloc(sizeof(double)*5);
+  int n = 5;
+  double* valores = (double*)malloc(sizeof(double)*n);
   Grafo g1;
 
-  inicializaGrafo(&g1, 5);
+  inicializaGrafo(&g1, n);
   insereAresta(&g1,0,1);
   insereAresta(&g1,1,2);
   insereAresta(&g1,2,3);
@@ -279,8 +341,9 @@ int main(){
 
   exibeGrafo(&g1);
   centralidadeDeIntermediacao(&g1, valores);
-  exibeArranjoReais(valores, 5);
+  exibeArranjoReais(valores, n);
 
+  free(valores);
   return 0;
 }
 
