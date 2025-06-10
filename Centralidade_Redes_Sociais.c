@@ -340,8 +340,43 @@ void centralidadeDeIntermediacao(Grafo* g, double* valores) {
   return;
 }
 
-// parece razoavelmente correto, apenas não está igual ao do professor ainda
 void centralidadePageRank(Grafo* g, double* valores, int iteracoes) {
+  int n = g->numVertices;
+  if(n <= 2 || iteracoes < 0)
+    return;  // não é possível analisar centralidade em um grafo onde não há relacionamentos
+
+  inicializarArrayPageRank(valores, n);
+
+  int* grauDeSaida = (int*)malloc(sizeof(int) *n);
+  CalcularGrausDeSaida(g, grauDeSaida);
+
+  // vamos usar esse vetor auxiliar (novosValoresIteracaoAtual), pois, no pagerank, utiliza-se no cálculo, 
+  // para toda a iteração atual sobre os vértices, os valores de centralidade da iteração anterior. 
+  // Depois, antes de ir pra próxima iteração, vamos atualizar valores[] para 
+  // utilizá-lo durante toda a proxima iteração sobre os vértices
+  double* novosValoresIteracaoAtual = (double*)calloc(n, sizeof(double));
+  
+  for(int iteracao = 0; iteracao < iteracoes; iteracao++){        // para cada iteração 
+    for(int verticeAtual = 0; verticeAtual < n; verticeAtual++){  // passa por todos os vértices 
+      double importancia = 0.00;
+      for(int y = 0; y < n; y++){                   // para cada vértice, verifica todas as suas relações verticais, ou seja, quem segue e quem não segue o vértice atual
+        if(g->matriz[y][verticeAtual] && verticeAtual != y){      // verifica se esse vértice segue o atual
+          importancia += valores[y] / grauDeSaida[y];             // se sim, inclui no cálculo
+        }
+      }   
+      novosValoresIteracaoAtual[verticeAtual] = ((1-d)/n) + d*importancia;     // o valor da iteracao atual recebe a formula calculada com os valores de cima
+    }
+
+    for(int j = 0; j < n; j++){
+      valores[j] = novosValoresIteracaoAtual[j];     // ao final de cada iteração, atualize o array valores para os valores novos encontrados nessa iteração 
+    }
+  }
+
+  free(grauDeSaida);
+  free(novosValoresIteracaoAtual);
+}
+
+/*void centralidadePageRankAlternativo(Grafo* g, double* valores, int iteracoes){ // essa é a versão que não bateu mas parece certa também.
   int n = g->numVertices;
   if(n <= 2 || iteracoes < 0)
     return;  // não é possível analisar centralidade em um grafo onde não há relacionamentos
@@ -362,30 +397,7 @@ void centralidadePageRank(Grafo* g, double* valores, int iteracoes) {
       valores[verticeAtual] = ((1-d)/n) + d*importancia;
     }
   }
-}
-
-int main(){
-  int n = 5;
-  double* valores = (double*)malloc(sizeof(double)*n);
-  Grafo g1;
-
-  inicializaGrafo(&g1, n);
-  insereAresta(&g1,0,1);
-  insereAresta(&g1,1,2);
-  insereAresta(&g1,2,3);
-  insereAresta(&g1,3,4);
-  insereAresta(&g1,4,0);
-  insereAresta(&g1,0,2);
-  insereAresta(&g1,1,4);
-  insereAresta(&g1,1,3);
-
-  exibeGrafo(&g1);
-  centralidadePageRank(&g1, valores, 10);
-  exibeArranjoReais(valores, n);
-
-  free(valores);
-  return 0;
-}
+}*/
 
 void testaFuncoes(Grafo* g, int n){
   double* valoresReais = (double*)malloc(sizeof(double)*n);
@@ -421,7 +433,7 @@ void testaFuncoes(Grafo* g, int n){
   free(valoresReais);
 }
 
-/*int main() {
+int main() {
 
   int n = 5;
   double* valoresReais = (double*)malloc(sizeof(double)*n);
@@ -479,4 +491,4 @@ void testaFuncoes(Grafo* g, int n){
   testaFuncoes(g3, n);
 
   return 0;  
-}*/
+}
