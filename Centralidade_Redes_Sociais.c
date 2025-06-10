@@ -14,6 +14,7 @@
 #define true 1
 #define false 0
 #define INFINITO 999999
+#define d 0.85
 typedef int bool;
 
 typedef struct {
@@ -186,13 +187,21 @@ void exibeArranjoReais(double* arranjo, int n){
   printf("\n\n");
 }
 
+/* minhas funções auxiliares */
+
 void zerarArray(double* array, int n){
   for(int i = 0; i<n; i++){
     array[i] = 0;
   }
 }
 
-void iniciarArrayCaminho(int* array, int n){
+void inicializarArrayPageRank(double* array, int n){
+  for(int i = 0; i<n; i++){
+    array[i] = 1.00/n;
+  }
+}
+
+void inicializarArrayCaminho(int* array, int n){
   for(int i = 0; i<n; i++){   
     array[i] = -1;
   }
@@ -222,6 +231,17 @@ void liberarMemoriaFW(int n, int*** dist, int*** pred){
   free(*pred);
   (*dist) = NULL;
   (*pred) = NULL;
+}
+
+void CalcularGrausDeSaida(Grafo* g, int* valores){
+  for(int i = 0; i < g->numVertices; i++){
+    valores[i] = 0;
+    for(int j = 0; j < g->numVertices; j++){
+      if(g->matriz[i][j] && i!=j){
+        valores[i]++;
+      }
+    }
+  }
 }
 
 /* ------------------------------------------------------------------------------------------------------------- */
@@ -276,7 +296,7 @@ void centralidadeDeIntermediacao(Grafo* g, double* valores) {
   int** dist; int** pred;
 
   int* caminho = (int*)malloc(sizeof(int) * n); // esse caminho será usado para armazenar os vértices que compoem o caminho minimo entre j e k, reconstruído apartir da matriz de predecessores. Lembrando que esse caminho está invertido, portanto seu preenchimento será por exemplo [k, ..., ..., j, -1]. -1 representa o fim do caminho
-  iniciarArrayCaminho(caminho, n);
+  inicializarArrayCaminho(caminho, n);
 
   executarFloydWarshall(g, &dist, &pred);
 
@@ -320,8 +340,28 @@ void centralidadeDeIntermediacao(Grafo* g, double* valores) {
   return;
 }
 
+// parece razoavelmente correto, apenas não está igual ao do professor ainda
 void centralidadePageRank(Grafo* g, double* valores, int iteracoes) {
-  /* COMPLETE/IMPLEMENTE ESTA FUNCAO */
+  int n = g->numVertices;
+  if(n <= 2 || iteracoes < 0)
+    return;  // não é possível analisar centralidade em um grafo onde não há relacionamentos
+
+  inicializarArrayPageRank(valores, n);
+
+  int* grauDeSaida = (int*)malloc(sizeof(int) *n);
+  CalcularGrausDeSaida(g, grauDeSaida);
+  
+  for(int iteracao = 0; iteracao < iteracoes; iteracao++){
+    for(int verticeAtual = 0; verticeAtual < n; verticeAtual++){
+      double importancia = 0.00;
+      for(int y = 0; y < n; y++){
+        if(g->matriz[y][verticeAtual] && verticeAtual != y){
+          importancia += valores[y] / grauDeSaida[y];
+        }
+      }   
+      valores[verticeAtual] = ((1-d)/n) + d*importancia;
+    }
+  }
 }
 
 int main(){
@@ -340,7 +380,7 @@ int main(){
   insereAresta(&g1,1,3);
 
   exibeGrafo(&g1);
-  centralidadeDeIntermediacao(&g1, valores);
+  centralidadePageRank(&g1, valores, 10);
   exibeArranjoReais(valores, n);
 
   free(valores);
