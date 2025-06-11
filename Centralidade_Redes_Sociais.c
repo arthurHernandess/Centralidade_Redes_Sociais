@@ -376,7 +376,8 @@ void centralidadePageRank(Grafo* g, double* valores, int iteracoes) {
   free(novosValoresIteracaoAtual);
 }
 
-/*void centralidadePageRankAlternativo(Grafo* g, double* valores, int iteracoes){ // essa é a versão que não bateu mas parece certa também.
+// converge mais rápido mas implica que dois usuários com centralidade igual possam ficar com valores diferentes na resposta 
+/*void centralidadePageRankAlternativo(Grafo* g, double* valores, int iteracoes){
   int n = g->numVertices;
   if(n <= 2 || iteracoes < 0)
     return;  // não é possível analisar centralidade em um grafo onde não há relacionamentos
@@ -434,7 +435,6 @@ void testaFuncoes(Grafo* g, int n){
 }
 
 int main() {
-
   int n = 5;
   double* valoresReais = (double*)malloc(sizeof(double)*n);
   
